@@ -49,12 +49,19 @@ class TTSService:
             import edge_tts
 
             # Select voice based on language
+            # Optimized for kindergarten-age children (3-10 years)
             if language == "sv":
-                voice = "sv-SE-HilleviNeural"  # Child-friendly Swedish
+                # Warm, gentle Swedish
+                voice = os.getenv("TTS_VOICE_SV", "sv-SE-SofieNeural")
+                # Slightly slower for clarity
+                rate = os.getenv("TTS_RATE", "-10%")
             else:
-                voice = "en-US-JennyNeural"  # Warm English
+                voice = os.getenv(
+                    "TTS_VOICE_EN", "en-US-JennyNeural")  # Warm English
+                # Slightly slower for clarity
+                rate = os.getenv("TTS_RATE", "-10%")
 
-            communicate = edge_tts.Communicate(text, voice)
+            communicate = edge_tts.Communicate(text, voice, rate=rate)
 
             async for chunk in communicate.stream():
                 if chunk["type"] == "audio":
