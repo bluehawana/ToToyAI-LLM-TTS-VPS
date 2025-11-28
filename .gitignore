@@ -70,6 +70,19 @@ backend/*.sqlite
 backend/stories/
 backend/test_*.mp3
 backend/test_response.mp3
+backend/voice_samples/
+backend/voice_styles/
+backend/*.mp3
+backend/kindergarten_*.mp3
+backend/qa_response_*.mp3
+backend/final_test.mp3
+
+# Credentials and sensitive files
+**/.env
+**/secrets/
+**/*.key
+**/*.pem
+**/credentials.json
 
 # Test scripts (optional - uncomment if you don't want to commit test files)
 # backend/test_gemini.py
