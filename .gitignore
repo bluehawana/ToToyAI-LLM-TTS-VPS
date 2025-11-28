@@ -65,3 +65,13 @@ backend/.venv/
 backend/venv/
 backend/*.db
 backend/*.sqlite
+
+# Generated content
+backend/stories/
+backend/test_*.mp3
+backend/test_response.mp3
+
+# Test scripts (optional - uncomment if you don't want to commit test files)
+# backend/test_gemini.py
+# backend/list_models.py
+# backend/test_wakeword.py
