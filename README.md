@@ -2,263 +2,208 @@
 
 **The First AI-Powered Plush Toy Platform in Sweden and EU**
 
-ToToyAI brings artificial intelligence to traditional plush toys, creating interactive companions that can talk, tell stories, answer questions, and engage with children through natural conversation. This project aims to be the pioneering AI toy platform in the Swedish and European markets.
+ToToyAI brings artificial intelligence to traditional plush toys, creating interactive companions that can talk, tell stories, answer questions, and engage with children through natural conversation.
 
-## 🎯 Vision
+🌐 **Live**: https://sagatoy.com
 
-Transform ordinary plush toys into intelligent, educational companions by embedding AI capabilities that enable:
+## ✅ Recent Achievements
 
-- Natural voice conversations with children
-- Educational content delivery (math, science, general knowledge)
-- Interactive storytelling and singing
-- Weather information and daily assistance
-- Safe, GDPR-compliant, child-appropriate interactions
+- **VPS Deployed**: Backend running on secured VPS at sagatoy.com
+- **SSH 2FA Security**: Two-factor authentication with Google Authenticator
+- **SSL/TLS**: HTTPS with auto-renewing Let's Encrypt certificates
+- **Swedish Stories**: 12 pre-generated Swedish children's stories (T-Rex, Kanin, Delfin series)
+- **Multi-LLM Support**: Groq, Gemini, and Ollama fallback chain
+- **Edge TTS**: Swedish and English voice synthesis optimized for children
 
 ## 🏗️ Architecture
 
-### Hardware
-
-- **Motherboard**: ESP32-S3 with WiFi and audio support
-- **Audio**: I2S microphone and speaker
-- **Power**: Dual 18650 batteries (4+ hours active use)
-- **Wake Word**: Local wake word detection for privacy
-
-### Backend (Self-Hosted VPS)
-
-- **API**: FastAPI with JWT authentication
-- **STT**: OpenAI Whisper for speech recognition
-- **LLM**: Flexible integration (Ollama, Groq, Alibaba Qwen, MiniMax)
-- **TTS**: Microsoft Edge TTS for natural speech
-- **Session**: Redis for conversation context
-- **Weather**: Open-Meteo API integration
-- **Deployment**: Docker Compose for easy deployment
-
-## 🚀 Features
-
-### Core Capabilities
-
-- ✅ Voice-activated conversations (wake word detection)
-- ✅ Speech-to-text with Whisper
-- ✅ LLM-powered responses (child-safe content filtering)
-- ✅ Text-to-speech with natural voices
-- ✅ Session management with conversation history
-- ✅ Weather information with child-friendly descriptions
-
-### Educational Features
-
-- 📚 Math problem solving with explanations
-- 🌍 General knowledge Q&A
-- 📖 Interactive storytelling
-- 🎵 Singing songs
-- 🌤️ Weather updates
-
-### Safety & Privacy
-
-- 🔒 GDPR compliant (EU regulations)
-- 🛡️ Content filtering for child safety
-- 🔐 Secure TLS 1.3 communication
-- 🚫 No audio storage beyond session
-- 👨‍👩‍👧 Parental data deletion controls
+```
+┌─────────────────┐     ┌──────────────────────────────────────┐
+│   Plush Toy     │     │         VPS (sagatoy.com)            │
+│   ESP32-S3      │────▶│  Nginx ─▶ FastAPI ─▶ Redis           │
+│   + Mic/Speaker │     │           │                          │
+└─────────────────┘     │     ┌─────┴─────┐                    │
+                        │     ▼           ▼                    │
+                        │   Groq       Edge TTS                │
+                        │   Gemini     (Swedish/English)       │
+                        │   Whisper                            │
+                        └──────────────────────────────────────┘
+```
 
 ## 📦 Project Structure
 
 ```
 ToToyAI-LLM-TTS-VPS/
-├── backend/                    # Backend services
+├── backend/                    # FastAPI backend
 │   ├── src/totoyai/
 │   │   ├── api/               # REST API endpoints
 │   │   ├── models/            # Data models
-│   │   ├── services/          # Core services (STT, LLM, TTS, etc.)
-│   │   └── main.py            # FastAPI application
-│   ├── tests/                 # Test suite
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── pyproject.toml
-├── .kiro/specs/               # Feature specifications
-│   └── ai-toy-platform/
-│       ├── requirements.md    # EARS requirements
-│       ├── design.md          # Technical design
-│       └── tasks.md           # Implementation tasks
-└── README.md
+│   │   └── services/          # STT, LLM, TTS services
+│   ├── stories/               # Pre-generated Swedish stories
+│   │   └── sv/
+│   │       ├── trex/          # T-Rex Adventures (4 stories)
+│   │       ├── kanin/         # Kanin and Friends (4 stories)
+│   │       └── delfin/        # Delfin the Helper (4 stories)
+│   ├── scripts/               # Utility scripts
+│   └── tests/                 # Test suite
+├── deploy/                    # Deployment scripts & configs
+│   ├── sagatoy.service        # Systemd service
+│   ├── nginx_config_sagatoy.conf
+│   └── *.sh                   # Setup & security scripts
+├── docs/                      # Documentation
+└── .kiro/specs/               # Feature specifications
 ```
 
-## 🛠️ Quick Start
+## 🚀 VPS Deployment
 
-### Prerequisites
+### Server Details
 
-- Python 3.9+
-- Docker & Docker Compose
-- VPS with Ubuntu (for deployment)
+- **Domain**: sagatoy.com
+- **SSH Port**: 1025 (non-standard for security)
+- **User**: harvard
+- **Security**: SSH key + 2FA (Google Authenticator)
 
-### Local Development
-
-1. **Clone the repository**
+### Quick Deploy
 
 ```bash
-git clone https://github.com/bluehawana/ToToyAI-LLM-TTS-VPS.git
-cd ToToyAI-LLM-TTS-VPS
+# SSH to VPS (requires 2FA code)
+ssh -p 1025 harvard@94.72.141.71
+
+# Navigate to project
+cd /var/www/sagatoy
+
+# Pull latest changes
+git pull origin main
+
+# Restart service
+sudo systemctl restart sagatoy
+
+# Check status
+sudo systemctl status sagatoy
 ```
 
-2. **Install backend dependencies**
+### Test Endpoints
 
 ```bash
-cd backend
-pip install -e ".[dev]"
+# Health check
+curl https://sagatoy.com/api/v1/health
+
+# Get auth token
+curl -X POST https://sagatoy.com/api/v1/auth/device \
+  -H "Content-Type: application/json" \
+  -d '{"device_id": "test-001", "device_secret": "secret"}'
+
+# Test conversation (use token from above)
+curl -X POST https://sagatoy.com/api/v1/conversation \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "test-1", "audio_data": ""}'
 ```
 
-3. **Run tests**
+## 🔐 VPS Security Setup
+
+The VPS is hardened with multiple security layers:
+
+### SSH + 2FA Configuration
+
+1. SSH key authentication only (no passwords)
+2. Google Authenticator 2FA required
+3. Non-standard SSH port (1025)
+4. Fail2Ban for brute-force protection
+
+### Firewall (UFW)
 
 ```bash
-pytest -v
+# Only these ports are open:
+- 1025/tcp (SSH)
+- 80/tcp (HTTP → redirects to HTTPS)
+- 443/tcp (HTTPS)
 ```
 
-4. **Start services with Docker**
+### SSL/TLS
+
+- Let's Encrypt certificates
+- Auto-renewal via Certbot
+- TLS 1.3 only
+
+## 🛠️ Local Development
 
 ```bash
-docker-compose up -d
-```
-
-5. **Access API**
-
-- API: http://localhost:8000
-- Health check: http://localhost:8000/api/v1/health
-- API docs: http://localhost:8000/docs
-
-### VPS Deployment
-
-1. **Setup VPS** (Ubuntu 22.04+)
-
-```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
-
-# Install Docker
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-
-# Install Docker Compose
-sudo apt install docker-compose-plugin -y
-```
-
-2. **Deploy application**
-
-```bash
-# Clone repository
+# Clone
 git clone https://github.com/bluehawana/ToToyAI-LLM-TTS-VPS.git
 cd ToToyAI-LLM-TTS-VPS/backend
 
-# Start services
-docker-compose up -d
+# Setup
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -e ".[dev]"
 
-# Check logs
-docker-compose logs -f
+# Configure
+cp .env.example .env
+# Edit .env with your API keys
+
+# Run
+uvicorn totoyai.main:app --reload
+
+# Test
+pytest -v
 ```
 
-## 🔧 Configuration
+## 📖 Swedish Story Library
 
-### LLM Provider Options
+12 pre-generated stories for children (3-10 years):
 
-The platform supports multiple LLM providers:
+| Series                | Stories                                  | Theme                 |
+| --------------------- | ---------------------------------------- | --------------------- |
+| **T-Rex Adventures**  | Stockholm, Gothenburg, Malmö, Copenhagen | Swedish geography     |
+| **Kanin and Friends** | Forest, Lake, River, Sea                 | Friendship & teamwork |
+| **Delfin the Helper** | Fishermen, Rescue, Swimming, Ocean       | Helping others        |
 
-**Ollama (Local)**
-
-```python
-# Default configuration in services/llm.py
-ollama_url = "http://localhost:11434"
-model = "llama3.1"
-```
-
-**Groq (Cloud)**
-
-```python
-# Fast inference with Groq
-ollama_url = "https://api.groq.com/openai/v1"
-# Add API key in environment
-```
-
-**Alibaba Qwen / MiniMax**
-
-```python
-# Configure for Chinese market
-# Update endpoint and authentication
-```
-
-### Environment Variables
-
-Create `.env` file:
+Generate new stories:
 
 ```bash
-# API Configuration
-SECRET_KEY=your-secret-key-here
-REDIS_URL=redis://localhost:6379
-
-# LLM Configuration
-OLLAMA_URL=http://ollama:11434
-LLM_MODEL=llama3.1
-
-# Optional: External API keys
-GROQ_API_KEY=your-groq-key
+cd backend
+python scripts/generate_stories.py --language sv --series all
 ```
 
 ## 📡 API Endpoints
 
-### Authentication
+| Endpoint               | Method | Description                 |
+| ---------------------- | ------ | --------------------------- |
+| `/api/v1/health`       | GET    | Health check                |
+| `/api/v1/auth/device`  | POST   | Device authentication       |
+| `/api/v1/conversation` | POST   | Voice conversation pipeline |
+| `/api/v1/weather`      | GET    | Weather information         |
 
-- `POST /api/v1/auth/device` - Device authentication
-
-### Conversation
-
-- `POST /api/v1/conversation` - Process voice conversation
-- `GET /api/v1/weather` - Get weather information
-
-### Health
-
-- `GET /api/v1/health` - Service health check
-
-## 🧪 Testing
+## 🔧 Environment Variables
 
 ```bash
-# Run all tests
-pytest -v
+# Required
+SECRET_KEY=your-secret-key
+GOOGLE_API_KEY=your-gemini-key
 
-# Run with coverage
-pytest --cov=totoyai --cov-report=html
-
-# Run specific test
-pytest tests/test_health.py -v
+# Optional
+GROQ_API_KEY=your-groq-key
+OLLAMA_URL=http://localhost:11434
+TTS_VOICE_SV=sv-SE-SofieNeural
+TTS_VOICE_EN=en-US-JennyNeural
 ```
-
-## 🤝 Contributing
-
-This is a pioneering project to bring AI-powered toys to Sweden and the EU market. Contributions are welcome!
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-Copyright © 2024 ToToyAI Project
-
-This project is proprietary software. All rights reserved.
 
 ## 🌟 Roadmap
 
-- [x] Backend API with authentication
-- [x] STT, LLM, TTS integration
-- [x] Weather service
-- [ ] Storytelling feature
-- [ ] Singing feature
+- [x] Backend API with JWT auth
+- [x] STT (Whisper), LLM (Groq/Gemini), TTS (Edge)
+- [x] VPS deployment with SSL
+- [x] SSH 2FA security
+- [x] Swedish story library (12 stories)
+- [ ] Wire up full conversation pipeline
 - [ ] ESP32 firmware
 - [ ] Mobile app for parents
-- [ ] Multi-language support (Swedish, English)
-- [ ] Cloud deployment guide
+- [ ] Wake word detection
 
-## 📞 Contact
+## 📄 License
 
-- **Project**: https://github.com/bluehawana/ToToyAI-LLM-TTS-VPS
-- **Author**: bluehawana
+Copyright © 2024 ToToyAI Project. All rights reserved.
 
 ---
 
